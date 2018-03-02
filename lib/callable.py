@@ -65,11 +65,19 @@ class Callable(object):
 		return False
 
 class WithHelp(Callable):
-	def actionHelp(self, cmd="", *sub):
-		if cmd == "":
+	def actionHelp(self, *cmd):
+		if cmd == [] or cmd == [""]:
 			# Print info about the class
 			print inspect.cleandoc(self.__doc__)
-		else:
-			print "Unknown topic '%s'" % cmd
+			return
+
+		try:
+			handler = getattr(self, "action" + "".join(map(lambda part: part[0].upper() + part[1:], cmd)))
+			print inspect.cleandoc(handler.__doc__)
+			return
+		except AttributeError:
+			pass
+
+		print "Unknown topic '%s'" % " ".join(cmd)
 
 Callable.WithHelp = WithHelp
