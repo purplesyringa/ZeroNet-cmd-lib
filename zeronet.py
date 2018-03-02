@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import sys
 from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
