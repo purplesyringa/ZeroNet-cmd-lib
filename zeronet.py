@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys
+import sys, json
 from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
@@ -10,6 +10,7 @@ class ZeroNet(Callable.WithHelp):
 		Commands:
 		help                        Print this help
 		config                      Get or set config values
+		wrapperkey 					Return wrapper key of a site or find a site by wrapper key
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -79,5 +80,35 @@ class ZeroNet(Callable.WithHelp):
 		"""
 
 		config.remove(name)
+
+
+	def actionWrapperkey(self, search, reverse=False):
+		"""
+			Return wrapper key of a site or find a site by wrapper key
+
+			Usage:
+			wrapperkey <address>        Print wrapper key of a site by address
+			wrapperkey <key> --reverse  Print site address by wrapper key
+		"""
+
+		if reverse == False:
+			address = search
+			with open("%s/sites.json" % config["data_directory"]) as f:
+				sites = json.loads(f.read())
+				if address in sites:
+					print sites[address]["wrapper_key"]
+				else:
+					sys.stderr.write("No site %s\n" % address)
+		else:
+			wrapper_key = search
+			with open("%s/sites.json" % config["data_directory"]) as f:
+				sites = json.loads(f.read())
+
+				for address, site in sites.iteritems():
+					if site["wrapper_key"] == wrapper_key:
+						print address
+						break
+				else:
+					sys.stderr.write("No wrapper key %s\n" % wrapper_key)
 
 ZeroNet(argv)
