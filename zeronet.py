@@ -17,16 +17,18 @@ class ZeroNet(Callable.WithHelp):
 	def actionHelp(self, cmd="", *sub):
 		if cmd == "help":
 			self.actionHelp("", *sub)
-		elif cmd == "config":
-			print "Print list of all saved values as newline-separated values"
-			print ""
-			print "Usage:"
-			print "config                  Print all values"
-			print "config <prefix>         Print all values beginning with <prefix>"
 		else:
 			super(ZeroNet, self).actionHelp(cmd, *sub)
 
 	def actionConfig(self, prefix=None):
+		"""
+			Print list of all saved values as newline-separated values
+
+			Usage:
+			config                  Print all values
+			config <prefix>         Print all values beginning with <prefix>
+		"""
+
 		print "\n".join(filter(lambda name: name.startswith(prefix), config.list()))
 
 ZeroNet(argv[0] if argv != [] else "help", argv[1:])
