@@ -74,6 +74,42 @@ class Config(object):
 		with open(self.path, "w") as f:
 			f.write(json.dumps(config))
 
+	# Delete variable
+	def __delattr__(self, name):
+		try:
+			with open(self.path, "r") as f:
+				config = json.loads(f.read())
+		except IOError:
+			config = dict()
+
+		del config[name]
+
+		with open(self.path, "w") as f:
+			f.write(json.dumps(config))
+	def __delitem__(self, name, value):
+		self.__delattr__(name, value)
+
+	# Delete variable recursively
+	def remove(self, name):
+		try:
+			with open(self.path, "r") as f:
+				config = json.loads(f.read())
+		except IOError:
+			config = dict()
+
+		current = config
+		for part in name.split(".")[:-1]:
+			try:
+				current = current[part]
+			except KeyError:
+				current[part] = dict()
+				current = current[part]
+
+		del current[name.split(".")[-1]]
+
+		with open(self.path, "w") as f:
+			f.write(json.dumps(config))
+
 	# Get data list
 	def __dir__(self):
 		try:
