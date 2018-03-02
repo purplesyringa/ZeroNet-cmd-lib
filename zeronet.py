@@ -14,13 +14,23 @@ class ZeroNet(Callable.WithHelp):
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
 
-	def actionConfig(self, prefix=None):
+	def actionConfig(self, *args):
+		"""
+			Get or set config values
+
+			Subcommands:
+			config list             Print list of all saved values as newline-separated values
+		"""
+
+		raise Callable.SubCommand
+
+	def actionConfigList(self, prefix=""):
 		"""
 			Print list of all saved values as newline-separated values
 
 			Usage:
-			config                  Print all values
-			config <prefix>         Print all values beginning with <prefix>
+			config list             Print all values
+			config list <prefix>    Print all values beginning with <prefix>
 		"""
 
 		print "\n".join(filter(lambda name: name.startswith(prefix), config.list()))
