@@ -1,5 +1,15 @@
 import os, json
 
+def recursive_dir(obj, prefix=""):
+	result = []
+	for name in obj:
+		absolute = "%s.%s" % (prefix, name) if prefix != "" else name
+		if isinstance(obj[name], dict):
+			result += recursive_dir(obj[name], absolute)
+		else:
+			result.append(absolute)
+	return result
+
 class Config(object):
 	def __init__(self, path):
 		self.__dict__["path"] = path
@@ -63,6 +73,25 @@ class Config(object):
 
 		with open(self.path, "w") as f:
 			f.write(json.dumps(config))
+
+	# Get data list
+	def __dir__(self):
+		try:
+			with open(self.path, "r") as f:
+				config = json.loads(f.read())
+			return dir(config)
+		except IOError:
+			return []
+
+	# Get data list recursively
+	def list(self):
+		try:
+			with open(self.path, "r") as f:
+				config = json.loads(f.read())
+		except IOError:
+			return []
+
+		return recursive_dir(config)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 config_json = os.path.abspath(os.path.join(current_dir, "../config.json"))
