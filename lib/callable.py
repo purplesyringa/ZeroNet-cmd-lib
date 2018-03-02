@@ -10,10 +10,12 @@ class Callable(object):
 		self.call("", args)
 
 	def call(self, cmd, args):
+		cmd = cmd.strip()
+
 		try:
 			handler = getattr(self, "action" + "".join(map(lambda part: part[0].upper() + part[1:] if part != "" else "", cmd.split(" "))))
 		except AttributeError:
-			all_commands = [name[6].lower() + name[7:] for name in dir(self) if name.startswith("action")]
+			all_commands = [name[6].lower() + name[7:] for name in dir(self) if name.startswith("action") and len(name) > 6]
 			sys.stderr.write("Unknown command '%s'. Allowed commands are: %s\n" % (cmd, ", ".join(all_commands)))
 			return
 
