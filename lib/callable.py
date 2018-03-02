@@ -6,8 +6,8 @@ class Callable(object):
 	class Redirect(Exception):
 		pass
 
-	def __init__(self, cmd, args):
-		self.call(cmd, args)
+	def __init__(self, args):
+		self.call("", args)
 
 	def call(self, cmd, args):
 		try:
@@ -69,6 +69,9 @@ class Callable(object):
 		sys.stderr.write("Arguments: %s\n" % ", ".join(expected_args))
 
 		return False
+
+	def action(self, *args):
+		raise Callable.SubCommand
 
 class WithHelp(Callable):
 	def actionHelp(self, *cmd):

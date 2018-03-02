@@ -68,4 +68,4 @@ class ZeroNet(Callable.WithHelp):
 
 		config.remove(name)
 
-ZeroNet(argv[0] if argv != [] else "help", argv[1:])
+ZeroNet(argv if argv != [] else ["help"])
