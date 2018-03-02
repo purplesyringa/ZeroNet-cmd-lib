@@ -1,16 +1,37 @@
 import sys
 
 class Callable(object):
+	class SubCommand(Exception):
+		pass
+	class Redirect(Exception):
+		pass
+
 	def __init__(self, cmd, args):
+		self.call(cmd, args)
+
+	def call(self, cmd, args):
 		try:
-			handler = getattr(self, "action" + cmd[0].upper() + cmd[1:])
+			handler = getattr(self, "action" + "".join(map(lambda part: part[0].upper() + part[1:], cmd.split(" "))))
 		except AttributeError:
 			all_commands = [name[6].lower() + name[7:] for name in dir(self) if name.startswith("action")]
-			sys.stderr.write("Unknown command %s. Allowed commands are: %s\n" % (cmd, ", ".join(all_commands)))
+			sys.stderr.write("Unknown command '%s'. Allowed commands are: %s\n" % (cmd, ", ".join(all_commands)))
 			return
 
 		if self.checkCall(cmd, handler, args):
-			handler(*args)
+			try:
+				handler(*args)
+			except Callable.SubCommand as e:
+				self.call("%s %s" % (cmd, args[0]), args[1:])
+			except Callable.Redirect as e:
+				if len(tuple(e)) == 0:
+					# Remove first argument and call it (as SubCommand)
+					self.call("%s %s" % (cmd, args[0]), args[1:])
+				elif len(tuple(e)) == 1:
+					# Call given value
+					self.call(tuple(e)[0], args)
+				else:
+					# Call given value and arguments
+					self.call(tuple(e)[0], tuple(e)[1])
 
 	def checkCall(self, cmd, func, args):
 		import inspect
