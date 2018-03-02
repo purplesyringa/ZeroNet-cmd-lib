@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
@@ -13,13 +14,18 @@ class ZeroNet(Callable.WithHelp):
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
 
-	def action(self, *args):
+	def action(self, *args, **kwargs):
 		if len(args) == 0:
-			raise Callable.Redirect("help")
+			if len(kwargs) == 0:
+				raise Callable.Redirect("help")
+			elif len(kwargs) == 1 and "help" in kwargs:
+				raise Callable.SubCommand("help")
+			else:
+				sys.stderr.write("Why are you passing named arguments to this command? Try 'help' instead.\n")
 		else:
 			raise Callable.SubCommand
 
-	def actionConfig(self, *args):
+	def actionConfig(self, *args, **kwargs):
 		"""
 			Get or set config values
 
