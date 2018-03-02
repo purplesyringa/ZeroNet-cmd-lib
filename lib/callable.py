@@ -21,7 +21,7 @@ class Callable(object):
 
 		if self.checkCall(cmd, handler, args):
 			try:
-				handler(*args)
+				self.callArgs(handler, args)
 			except Callable.SubCommand as e:
 				if len(args) == 0:
 					sys.stderr.write("'%s' command is not a command but has subcommands.\n" % cmd)
@@ -71,6 +71,9 @@ class Callable(object):
 		sys.stderr.write("Arguments: %s\n" % ", ".join(expected_args))
 
 		return False
+
+	def callArgs(self, handler, args):
+		handler(*args)
 
 	def action(self, *args):
 		raise Callable.SubCommand
