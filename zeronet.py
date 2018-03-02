@@ -14,12 +14,6 @@ class ZeroNet(Callable.WithHelp):
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
 
-	def actionHelp(self, cmd="", *sub):
-		if cmd == "help":
-			self.actionHelp("", *sub)
-		else:
-			super(ZeroNet, self).actionHelp(cmd, *sub)
-
 	def actionConfig(self, prefix=None):
 		"""
 			Print list of all saved values as newline-separated values
