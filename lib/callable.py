@@ -41,41 +41,120 @@ class Callable(object):
 					# Call given value and arguments
 					self.call(tuple(e)[0], tuple(e)[1])
 
-	def checkCall(self, cmd, func, args):
+	def checkCall(self, cmd, func, argv):
 		import inspect
 
 		expected_args = inspect.getargspec(func).args[1:] # Split "self"
-		varargs = inspect.getargspec(func).varargs
 		defaults = inspect.getargspec(func).defaults or tuple()
 
-		if varargs is not None:
-			if len(args) >= len(expected_args) - len(defaults):
-				return True
-		else:
-			if len(expected_args) - len(defaults) <= len(args) <= len(expected_args):
-				return True
-
-		if varargs is not None:
-			sys.stderr.write("%s expected %s argument(s) or more, %s given\n" % (cmd, len(expected_args), len(args)))
-			expected_args += ["*%s" % varargs]
-		elif len(defaults) > 0:
-			sys.stderr.write("%s expected from %s to %s argument(s), %s given\n" % (cmd, len(expected_args) - len(defaults), len(expected_args), len(args)))
-		else:
-			sys.stderr.write("%s expected %s argument(s), %s given\n" % (cmd, len(expected_args), len(args)))
+		if self.checkArgs(cmd, func, argv):
+			return True
 
 		if len(defaults) > 0:
 			default_args = reversed(zip(reversed(expected_args), reversed(defaults)))
 			default_args = map(lambda arg: "%s=%s" % arg, default_args)
 			expected_args = expected_args[:-len(default_args)] + default_args
 
-		sys.stderr.write("Arguments: %s\n" % ", ".join(expected_args))
+		sys.stderr.write("Allowed arguments: %s\n" % ", ".join(expected_args))
 
 		return False
 
-	def callArgs(self, handler, args):
-		handler(*args)
+	def checkArgs(self, cmd, func, argv):
+		args, kwargs = self.parseArgs(argv)
 
-	def action(self, *args):
+		import inspect
+
+		expected_args = inspect.getargspec(func).args[1:] # Split "self"
+		varargs = inspect.getargspec(func).varargs
+		keywords = inspect.getargspec(func).keywords
+		defaults = inspect.getargspec(func).defaults or tuple()
+
+		resulting_args = dict()
+		if varargs is not None:
+			resulting_args[varargs] = []
+		if keywords is not None:
+			resulting_args[keywords] = {}
+
+		# Positional arguments
+		for cnt, value in enumerate(args):
+			if cnt < len(expected_args):
+				# Passed just as argument
+				resulting_args[expected_args[cnt]] = value
+			else:
+				# Passed to *args
+				if varargs is None:
+					sys.stderr.write("Too many positional arguments passed to '%s': expected at most %s, got %s.\n" % (cmd, len(expected_args), len(args)))
+					return False
+				else:
+					resulting_args[varargs].append(value)
+
+		# Named arguments
+		handled_kwargs = []
+		for name, value in kwargs.iteritems():
+			if name in handled_kwargs:
+				sys.stderr.write("'%s' was passed to '%s' as named argument several times.\n" % (name, cmd))
+				return False
+
+			handled_kwargs.append(name)
+
+			if name in expected_args:
+				# Passed just as argument
+				if name in resulting_args:
+					sys.stderr.write("'%s' was passed to '%s' as both positional argument and named.\n" % (name, cmd))
+					return False
+
+				resulting_args[name] = value
+			else:
+				# Passed to **kwargs
+				if keywords is None:
+					sys.stderr.write("Unknown named argument '%s' passed to '%s'.\n" % (name, cmd))
+					return False
+				else:
+					resulting_args[keywords][name] = value
+
+		# Defaults
+		if len(defaults) > 0:
+			for cnt, name in enumerate(expected_args[-len(defaults):]):
+				if name not in resulting_args:
+					resulting_args[name] = defaults[cnt]
+
+		# Check that all the arguments were passed
+		for name in expected_args:
+			if name not in resulting_args:
+				sys.stderr.write("Argument '%s' was not passed to '%s'.\n" % (name, cmd))
+				return False
+
+		return True
+
+	def parseArgs(self, argv):
+		args = []
+		kwargs = {}
+
+		kwname = None
+
+		for arg in argv:
+			if arg.startswith("--"):
+				if kwname is not None:
+					kwargs[kwname] = True
+
+				kwname = arg[2:]
+			else:
+				if kwname is None:
+					args.append(arg)
+				else:
+					kwargs[kwname] = arg
+					kwname = None
+
+		if kwname is not None:
+			kwargs[kwname] = True
+
+		return args, kwargs
+
+	def callArgs(self, handler, argv):
+		args, kwargs = self.parseArgs(argv)
+		handler(*args, **kwargs)
+
+	def action(self, *args, **kwargs):
 		raise Callable.SubCommand
 
 class WithHelp(Callable):
