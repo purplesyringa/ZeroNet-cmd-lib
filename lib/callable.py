@@ -21,10 +21,16 @@ class Callable(object):
 			try:
 				handler(*args)
 			except Callable.SubCommand as e:
+				if len(args) == 0:
+					sys.stderr.write("'%s' command is not a command but has subcommands.\n" % cmd)
+					return
 				self.call("%s %s" % (cmd, args[0]), args[1:])
 			except Callable.Redirect as e:
 				if len(tuple(e)) == 0:
 					# Remove first argument and call it (as SubCommand)
+					if len(args) == 0:
+						sys.stderr.write("'%s' command is not a command but has subcommands.\n" % cmd)
+						return
 					self.call("%s %s" % (cmd, args[0]), args[1:])
 				elif len(tuple(e)) == 1:
 					# Call given value
