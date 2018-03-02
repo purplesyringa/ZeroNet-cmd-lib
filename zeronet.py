@@ -21,6 +21,7 @@ class ZeroNet(Callable.WithHelp):
 			Subcommands:
 			config list                 Print list of all saved values as newline-separated values
 			config set                  Set config value
+			config get                  Get config value
 		"""
 
 		raise Callable.SubCommand
@@ -45,5 +46,15 @@ class ZeroNet(Callable.WithHelp):
 		"""
 
 		config.set(name, value)
+
+	def actionConfigGet(self, name):
+		"""
+			Get config value
+
+			Usage:
+			config get <name>           Print config variable <name>. <name> can be dot-separated.
+		"""
+
+		print config.get(name)
 
 ZeroNet(argv[0] if argv != [] else "help", argv[1:])
