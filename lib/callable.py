@@ -66,7 +66,7 @@ class Callable(object):
 
 class WithHelp(Callable):
 	def actionHelp(self, *cmd):
-		if cmd == [] or cmd == [""]:
+		if cmd in [[], [""], tuple(), ("",)]:
 			# Print info about the class
 			print inspect.cleandoc(self.__doc__)
 			return
