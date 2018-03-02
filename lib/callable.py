@@ -1,4 +1,4 @@
-import sys
+import sys, inspect
 
 class Callable(object):
 	class SubCommand(Exception):
@@ -63,3 +63,13 @@ class Callable(object):
 		sys.stderr.write("Arguments: %s\n" % ", ".join(expected_args))
 
 		return False
+
+class WithHelp(Callable):
+	def actionHelp(self, cmd="", *sub):
+		if cmd == "":
+			# Print info about the class
+			print inspect.cleandoc(self.__doc__)
+		else:
+			print "Unknown topic '%s'" % cmd
+
+Callable.WithHelp = WithHelp
