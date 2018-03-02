@@ -13,6 +13,12 @@ class ZeroNet(Callable.WithHelp):
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
 
+	def action(self, *args):
+		if len(args) == 0:
+			raise Callable.Redirect("help")
+		else:
+			raise Callable.SubCommand
+
 	def actionConfig(self, *args):
 		"""
 			Get or set config values
@@ -68,4 +74,4 @@ class ZeroNet(Callable.WithHelp):
 
 		config.remove(name)
 
-ZeroNet(argv if argv != [] else ["help"])
+ZeroNet(argv)
