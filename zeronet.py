@@ -11,7 +11,7 @@ class ZeroNet(Callable.WithHelp):
 		Commands:
 		help                        Print this help
 		config                      Get or set config values
-		wrapperkey 					Return wrapper key of a site or find a site by wrapper key
+		wrapperkey                  Return wrapper key of a site or find a site by wrapper key
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
