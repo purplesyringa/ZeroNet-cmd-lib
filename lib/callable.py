@@ -73,10 +73,16 @@ class WithHelp(Callable):
 
 		try:
 			handler = getattr(self, "action" + "".join(map(lambda part: part[0].upper() + part[1:], cmd)))
-			print inspect.cleandoc(handler.__doc__)
-			return
+			if handler.__doc__ is not None:
+				print inspect.cleandoc(handler.__doc__)
+				return
 		except AttributeError:
 			pass
+
+		if cmd == ["help"] or cmd == ("help",):
+			# Unable to find info on topic 'help' - no __doc__ in 'help' method or no 'help' method, use default help
+			print inspect.cleandoc(self.__doc__)
+			return
 
 		print "Unknown topic '%s'" % " ".join(cmd)
 
