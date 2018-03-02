@@ -12,6 +12,8 @@ class Config(object):
 				return config[name]
 		except IOError:
 			raise AttributeError("No config file and therefore no '%s' attribute" % name)
+	def __getitem__(self, name):
+		return self.__getattr__(name)
 
 	# Read value recursively
 	def get(self, name, default=None):
@@ -38,6 +40,8 @@ class Config(object):
 
 		with open(self.path, "w") as f:
 			f.write(json.dumps(config))
+	def __setitem__(self, name, value):
+		self.__setattr__(name, value)
 
 	# Write value recursively
 	def set(self, name, value):
