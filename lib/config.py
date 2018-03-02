@@ -35,7 +35,7 @@ class Config(object):
 				val = val[part]
 
 			return val
-		except AttributeError:
+		except KeyError, AttributeError:
 			return default
 
 	# Write single value
@@ -64,12 +64,12 @@ class Config(object):
 		current = config
 		for part in name.split(".")[:-1]:
 			try:
-				current = current[name]
-			except AttributeError:
-				current[name] = dict()
-				current = current[name]
+				current = current[part]
+			except KeyError:
+				current[part] = dict()
+				current = current[part]
 
-		current[name] = value
+		current[name.split(".")[-1]] = value
 
 		with open(self.path, "w") as f:
 			f.write(json.dumps(config))
