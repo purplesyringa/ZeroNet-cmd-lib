@@ -22,6 +22,7 @@ class ZeroNet(Callable.WithHelp):
 			config list                 Print list of all saved values as newline-separated values
 			config set                  Set config value
 			config get                  Get config value
+			config remove               Remove config value
 		"""
 
 		raise Callable.SubCommand
@@ -56,5 +57,16 @@ class ZeroNet(Callable.WithHelp):
 		"""
 
 		print config.get(name)
+
+	def actionConfigRemove(self, name):
+		"""
+			Remove config variable
+
+			Usage:
+			config remove <name>        Remove config variable <name>. All the following 'config get' will be rejected.
+			                            <name> can be dot-separated.
+		"""
+
+		config.remove(name)
 
 ZeroNet(argv[0] if argv != [] else "help", argv[1:])
