@@ -26,6 +26,7 @@ class ZeroNet(Callable.WithHelp):
 				raise Callable.SubCommand("help")
 			else:
 				sys.stderr.write("Why are you passing named arguments to this command? Try 'help' instead.\n")
+				return 2
 		else:
 			raise Callable.SubCommand
 
@@ -101,6 +102,7 @@ class ZeroNet(Callable.WithHelp):
 				print Site.find_by_wrapperkey(config["data_directory"], search)
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
+			return 1
 
 	def actionSocket(self, site, cmd, *args, **kwargs):
 		"""
@@ -115,13 +117,13 @@ class ZeroNet(Callable.WithHelp):
 
 		if len(args) > 0 and len(kwargs) > 0:
 			sys.stderr.write("ZeroWebSocket doesn't accept requests with both positional arguments and named arguments used.\n")
-			return
+			return 2
 
 		try:
 			wrapper_key = Site.get_wrapperkey(config["data_directory"], site)
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
-			return
+			return 1
 
 		address = config.get("server.address", "127.0.0.1")
 		port = config.get("server.port", "43110")
@@ -130,11 +132,13 @@ class ZeroNet(Callable.WithHelp):
 		with ZeroWebSocket(wrapper_key, "%s:%s" % (address, port), secure) as ws:
 			try:
 				print ws.send(cmd, *args, **kwargs)
+				return 0
 			except ZeroWebSocket.Error as e:
 				sys.stderr.write("%s\n" % "\n".join(e))
+				return 1
 
 try:
-	ZeroNet(argv)
+	sys.exit(ZeroNet(argv))
 except config.AttributeError as e:
 	sys.stderr.write("%s\n" % e)
 except Callable.Error as e:
