@@ -7,6 +7,7 @@ from lib.config import config
 import zeronet_lib.site as Site
 import zeronet_lib.user as User
 import zeronet_lib.instance as Instance
+import zeronet_lib.addresses as Addresses
 from zeronet_lib.zerowebsocket import ZeroWebSocket
 
 class ZeroNet(Callable.WithHelp):
@@ -134,13 +135,13 @@ class ZeroNet(Callable.WithHelp):
 		port = config.get("server.port", "43110")
 		secure = config.get("server.secure", False)
 
-		with ZeroWebSocket(wrapper_key, "%s:%s" % (address, port), secure) as ws:
-			try:
+		try:
+			with ZeroWebSocket(wrapper_key, "%s:%s" % (address, port), secure) as ws:
 				print ws.send(cmd, *args, **kwargs)
 				return 0
-			except ZeroWebSocket.Error as e:
-				sys.stderr.write("%s\n" % "\n".join(e))
-				return 1
+		except ZeroWebSocket.Error as e:
+			sys.stderr.write("%s\n" % "\n".join(e))
+			return 1
 
 
 	def actionAccount(self, *args, **kwargs):
@@ -287,6 +288,7 @@ class ZeroNet(Callable.WithHelp):
 			Subcommands:
 			instance running            Check whether ZeroNet instance is running
 			instance pid                Get PID of ZeroNet instance
+			instance shutdown           Shutdown ZeroNet instance
 		"""
 
 		raise Callable.SubCommand
@@ -315,6 +317,39 @@ class ZeroNet(Callable.WithHelp):
 		else:
 			print pid
 			return 0
+
+	def actionInstanceShutdown(self, force=False, signal=None):
+		"""
+			Shutdown ZeroNet instance
+
+			Usage:
+			instance shutdown           Call ZeroWebSocket for shutdown
+			instance shutdown --force   Kill ZeroNet process
+			instance shutdown <signal>  Send signal to ZeroNet process
+		"""
+
+		if not force:
+			try:
+				wrapper_key = Site.getWrapperkey(config["data_directory"], config.get("homepage", Addresses.ZeroHello))
+			except KeyError as e:
+				sys.stderr.write("Could not get wrapper key of ZeroHello. Try 'instance shutdown --force'.\n")
+				return 1
+
+			address = config.get("server.address", "127.0.0.1")
+			port = config.get("server.port", "43110")
+			secure = config.get("server.secure", False)
+
+			try:
+				with ZeroWebSocket(wrapper_key, "%s:%s" % (address, port), secure) as ws:
+					try:
+						ws.send("serverShutdown")
+					except ZeroWebSocket.Error as e:
+						pass
+			except ZeroWebSocket.Error as e:
+				sys.stderr.write("%s\n" % e)
+				return 1
+		else:
+			raise NotImplementedError
 
 try:
 	sys.exit(ZeroNet(argv))
