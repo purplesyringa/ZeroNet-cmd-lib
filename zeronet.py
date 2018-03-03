@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, signal as os_signal
+import sqlite3
 from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
@@ -20,6 +21,7 @@ class ZeroNet(Callable.WithHelp):
 		account                     Configure accounts
 		certs                       Configure certificates
 		instance                    Get info about ZeroNet instance
+		sql                         Run sql query on a database
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -375,6 +377,29 @@ class ZeroNet(Callable.WithHelp):
 
 	def getDataDirectory(self):
 		return config.get("data_directory", "%s/data" % config["root_directory"])
+
+	def actionSql(self, query, site=None):
+		"""
+			Run sql query on a database
+
+			Usage:
+			sql <query>                 Run <query> on content.db
+			sql <query> --site <site>   Run <query> on <site>'s database
+		"""
+
+		if site is None:
+			path = "%s/content.db" % self.getDataDirectory()
+		else:
+			raise NotImplementedError
+
+		try:
+			rows = Site.sqlQuery(path, query)
+		except sqlite3.OperationalError as e:
+			sys.stderr.write("%s\n" % e)
+			return 1
+
+		for row in rows:
+			print "\t".join(map(str, row))
 
 try:
 	sys.exit(ZeroNet(argv))
