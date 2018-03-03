@@ -21,7 +21,7 @@ class Callable(object):
 		pass
 
 	def __init__(self, args):
-		self.call("", args)
+		return self.call("", args)
 
 	def call(self, cmd, args):
 		cmd = cmd.strip()
@@ -32,31 +32,32 @@ class Callable(object):
 			all_commands = [name[6].lower() + name[7:] for name in dir(self) if name.startswith("action") and len(name) > 6]
 			raise Callable.Error("Unknown command '%s'. Allowed commands are: %s" % (cmd, ", ".join(all_commands)))
 
-		if self.checkCall(cmd, handler, args):
-			try:
-				self.callArgs(handler, args)
-			except Callable.SubCommand as e:
+		self.checkCall(cmd, handler, args)
+
+		try:
+			return self.callArgs(handler, args)
+		except Callable.SubCommand as e:
+			if len(args) == 0:
+				raise Callable.Error("'%s' command is not a command but has subcommands." % cmd)
+
+			if len(tuple(e)) == 0:
+				# Remove first argument and call it
+				return self.call("%s %s" % (cmd, args[0]), args[1:])
+			else:
+				# Remove first argument and call given command
+				return self.call(tuple(e)[0], args[1:])
+		except Callable.Redirect as e:
+			if len(tuple(e)) == 0:
+				# Remove first argument and call it (as SubCommand)
 				if len(args) == 0:
 					raise Callable.Error("'%s' command is not a command but has subcommands." % cmd)
-
-				if len(tuple(e)) == 0:
-					# Remove first argument and call it
-					self.call("%s %s" % (cmd, args[0]), args[1:])
-				else:
-					# Remove first argument and call given command
-					self.call(tuple(e)[0], args[1:])
-			except Callable.Redirect as e:
-				if len(tuple(e)) == 0:
-					# Remove first argument and call it (as SubCommand)
-					if len(args) == 0:
-						raise Callable.Error("'%s' command is not a command but has subcommands." % cmd)
-					self.call("%s %s" % (cmd, args[0]), args[1:])
-				elif len(tuple(e)) == 1:
-					# Call given value
-					self.call(tuple(e)[0], args)
-				else:
-					# Call given value and arguments
-					self.call(tuple(e)[0], tuple(e)[1])
+				return self.call("%s %s" % (cmd, args[0]), args[1:])
+			elif len(tuple(e)) == 1:
+				# Call given value
+				return self.call(tuple(e)[0], args)
+			else:
+				# Call given value and arguments
+				return self.call(tuple(e)[0], tuple(e)[1])
 
 	def checkCall(self, cmd, func, argv):
 		import inspect
@@ -162,7 +163,7 @@ class Callable(object):
 
 	def callArgs(self, handler, argv):
 		args, kwargs = self.parseArgs(argv)
-		handler(*args, **kwargs)
+		return handler(*args, **kwargs)
 
 	def action(self, *args, **kwargs):
 		raise Callable.SubCommand
