@@ -1,11 +1,11 @@
 import json
 
-def get_users_json(data_directory):
+def getUsersJson(data_directory):
 	with open("%s/users.json" % data_directory) as f:
 		return json.loads(f.read())
 
-def get_users(data_directory):
-	return get_users_json(data_directory).keys()
+def getUsers(data_directory):
+	return getUsersJson(data_directory).keys()
 
-def get_user(data_directory, address):
-	return get_users_json(data_directory)[address]
+def getUser(data_directory, address):
+	return getUsersJson(data_directory)[address]

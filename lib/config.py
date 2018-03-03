@@ -1,11 +1,11 @@
 import os, json
 
-def recursive_dir(obj, prefix=""):
+def recursiveDir(obj, prefix=""):
 	result = []
 	for name in obj:
 		absolute = "%s.%s" % (prefix, name) if prefix != "" else name
 		if isinstance(obj[name], dict):
-			result += recursive_dir(obj[name], absolute)
+			result += recursiveDir(obj[name], absolute)
 		else:
 			result.append(absolute)
 	return result
@@ -132,7 +132,7 @@ class Config(object):
 		except IOError:
 			return []
 
-		return recursive_dir(config)
+		return recursiveDir(config)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 config_json = os.path.abspath(os.path.join(current_dir, "../config.json"))

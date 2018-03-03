@@ -99,9 +99,9 @@ class ZeroNet(Callable.WithHelp):
 
 		try:
 			if reverse == False:
-				print Site.get_wrapperkey(config["data_directory"], search)
+				print Site.getWrapperkey(config["data_directory"], search)
 			else:
-				print Site.find_by_wrapperkey(config["data_directory"], search)
+				print Site.findByWrapperkey(config["data_directory"], search)
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
 			return 1
@@ -122,7 +122,7 @@ class ZeroNet(Callable.WithHelp):
 			return 2
 
 		try:
-			wrapper_key = Site.get_wrapperkey(config["data_directory"], site)
+			wrapper_key = Site.getWrapperkey(config["data_directory"], site)
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
 			return 1
@@ -161,7 +161,7 @@ class ZeroNet(Callable.WithHelp):
 			account list                Print newline-separated list of addresses
 		"""
 
-		print "\n".join(User.get_users(config["data_directory"]))
+		print "\n".join(User.getUsers(config["data_directory"]))
 
 	def actionAccountMaster(self):
 		"""
@@ -174,7 +174,7 @@ class ZeroNet(Callable.WithHelp):
 		address = self.getCurrentAccount()
 
 		try:
-			print User.get_user(config["data_directory"], address)["master_seed"]
+			print User.getUser(config["data_directory"], address)["master_seed"]
 		except KeyError:
 			sys.stderr.write("No account %s\n" % address)
 			return 1
@@ -183,12 +183,12 @@ class ZeroNet(Callable.WithHelp):
 		address = config.get("account.current", None)
 
 		if address is None:
-			address = User.get_users(config["data_directory"])[0]
+			address = User.getUsers(config["data_directory"])[0]
 			config.set("account.current", address)
 
 		return address
 	def getCurrentUser(self):
-		return User.get_user(config["data_directory"], self.getCurrentAccount())
+		return User.getUser(config["data_directory"], self.getCurrentAccount())
 
 	def actionAccountChoose(self, address):
 		"""
@@ -199,7 +199,7 @@ class ZeroNet(Callable.WithHelp):
 		"""
 
 		try:
-			User.get_user(config["data_directory"], address)
+			User.getUser(config["data_directory"], address)
 		except KeyError:
 			sys.stderr.write("No account %s\n" % address)
 			return 1
