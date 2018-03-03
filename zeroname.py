@@ -13,6 +13,7 @@ class ZeroName(Callable.WithHelp):
 		Commands:
 		help                        Print this help
 		resolve                     Get address of a site by its domain
+		lookup                      Get site domain(s) by address
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -39,6 +40,20 @@ class ZeroName(Callable.WithHelp):
 
 		try:
 			print Site.findByDomain("%s/%s/data/names.json" % (self.getDataDirectory(), config.get("zeroname.registry", Addresses.ZeroName)), domain)
+		except KeyError as e:
+			sys.stderr.write("%s\n" % e[0])
+			return 1
+
+	def actionLookup(self, address):
+		"""
+			Get site domain(s) by address
+
+			Usage:
+			lookup <address>            Print domain(s) of the site
+		"""
+
+		try:
+			print "\n".join(Site.getDomains("%s/%s/data/names.json" % (self.getDataDirectory(), config.get("zeroname.registry", Addresses.ZeroName)), address))
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
 			return 1
