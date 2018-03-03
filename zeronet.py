@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys
+import sys, os
 from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
@@ -285,6 +285,7 @@ class ZeroNet(Callable.WithHelp):
 
 			Subcommands:
 			instance running            Check whether ZeroNet instance is running
+			instance pid                Get PID of ZeroNet instance
 		"""
 
 		raise Callable.SubCommand
@@ -303,6 +304,28 @@ class ZeroNet(Callable.WithHelp):
 				return 1
 		except IOError:
 			return 0
+
+	def actionInstancePid(self):
+		"""
+			Get PID of ZeroNet instance
+
+			Usage:
+			instance pid                Return 0 and print the PID if running, return 1 otherwise
+		"""
+
+		import psutil
+
+		lock_file = os.path.realpath("%s/lock.pid" % config["data_directory"]).encode("utf-8")
+
+		for proc in psutil.process_iter():
+			try:
+				if lock_file in (x.path for x in proc.open_files()):
+					print proc.pid
+					return 0
+			except psutil.Error as e:
+				pass
+
+		return 1
 
 try:
 	sys.exit(ZeroNet(argv))
