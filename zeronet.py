@@ -16,6 +16,7 @@ class ZeroNet(Callable.WithHelp):
 		wrapperkey                  Return wrapper key of a site or find a site by wrapper key
 		socket                      Send request to ZeroWebSocket
 		account                     Configure accounts
+		certs                       Configure certificates
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -148,7 +149,6 @@ class ZeroNet(Callable.WithHelp):
 			account list                Get list of addresses
 			account master              Get master_seed of account
 			account choose              Choose account for actions
-			account certs               Configure certificates
 		"""
 
 		raise Callable.SubCommand
@@ -206,36 +206,35 @@ class ZeroNet(Callable.WithHelp):
 
 		config.set("account.current", address)
 
-	def actionAccountCerts(self, *args, **kwargs):
+	def actionCerts(self, *args, **kwargs):
 		"""
 			Configure certificates
 
 			Subcommands:
-			account certs list          Get list of certs
-			account certs address       Get auth_address of a cert
-			account certs privatekey    Get auth_privatekey of a cert
-			account certs username      Get user name of a cert
+			certs list                  Get list of certs
+			certs address               Get auth_address of a cert
+			certs privatekey            Get auth_privatekey of a cert
+			certs username              Get user name of a cert
 		"""
 
 		raise Callable.SubCommand
 
-	def actionAccountCertsList(self):
+	def actionCertsList(self):
 		"""
 			Get list of certs
 
 			Usage:
-			account certs list          Print newline-separated names of auth certs
+			certs list                  Print newline-separated names of auth certs
 		"""
 
 		print "\n".join(self.getCurrentUser()["certs"].keys())
 
-	def actionAccountCertsAddress(self, cert):
+	def actionCertsAddress(self, cert):
 		"""
 			Get auth_address of a cert
 
 			Usage:
-			account certs address       Print auth_address of a certificate
-			<cert>
+			certs address <cert>        Print auth_address of a certificate
 		"""
 
 		certs = self.getCurrentUser()["certs"]
@@ -246,13 +245,12 @@ class ZeroNet(Callable.WithHelp):
 			sys.stderr.write("No cert %s\n" % cert)
 			return 1
 
-	def actionAccountCertsPrivatekey(self, cert):
+	def actionCertsPrivatekey(self, cert):
 		"""
 			Get auth_privatekey of a cert
 
 			Usage:
-			account certs privatekey    Print auth_privatekey of a certificate
-			<cert>
+			certs privatekey <cert>     Print auth_privatekey of a certificate
 		"""
 
 		certs = self.getCurrentUser()["certs"]
@@ -263,13 +261,12 @@ class ZeroNet(Callable.WithHelp):
 			sys.stderr.write("No cert %s\n" % cert)
 			return 1
 
-	def actionAccountCertsUsername(self, cert):
+	def actionCertsUsername(self, cert):
 		"""
 			Get user name of a cert
 
 			Usage:
-			account certs username      Print auth_user_name of a certificate
-			<cert>
+			certs username <cert>       Print auth_user_name of a certificate
 		"""
 
 		certs = self.getCurrentUser()["certs"]
