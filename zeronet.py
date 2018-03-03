@@ -45,6 +45,16 @@ class ZeroNet(Callable.WithHelp):
 			config set                  Set config value
 			config get                  Get config value
 			config remove               Remove config value
+
+			Config variables:
+			Name                        Default                 Comment
+			server.address              127.0.0.1               The address which will be used for communication with ZeroNet
+			server.port                 43110                   ZeroNet port
+			server.secure               False                   Sets whether ws/http or wss/https protocol should be used
+			account.current             (the first account)     The account chosen by 'account choose' command
+			homepage                    (ZeroHello address)     ZeroNet homepage
+			root_directory                                      Path to ZeroNet root directory (the one having 'src')
+			data_directory              (root_directory)/data   Path to data directory
 		"""
 
 		raise Callable.SubCommand
