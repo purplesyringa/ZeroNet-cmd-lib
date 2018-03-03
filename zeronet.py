@@ -5,6 +5,7 @@ from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
 import zeronet_lib.site as Site
+import zeronet_lib.user as User
 from zeronet_lib.zerowebsocket import ZeroWebSocket
 
 class ZeroNet(Callable.WithHelp):
@@ -14,6 +15,7 @@ class ZeroNet(Callable.WithHelp):
 		config                      Get or set config values
 		wrapperkey                  Return wrapper key of a site or find a site by wrapper key
 		socket                      Send request to ZeroWebSocket
+		user                        Configure users
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -136,6 +138,27 @@ class ZeroNet(Callable.WithHelp):
 			except ZeroWebSocket.Error as e:
 				sys.stderr.write("%s\n" % "\n".join(e))
 				return 1
+
+
+	def actionUser(self, *args, **kwargs):
+		"""
+			Configure users
+
+			Subcommands:
+			user list                   Get list of addresses
+		"""
+
+		raise Callable.SubCommand
+
+	def actionUserList(self):
+		"""
+			Get list of addresses
+
+			Usage:
+			user list                   Print newline-separated list of addresses
+		"""
+
+		print "\n".join(User.get_users(config["data_directory"]))
 
 try:
 	sys.exit(ZeroNet(argv))
