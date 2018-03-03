@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, signal as os_signal
-import sqlite3
+import sqlite3, json
 from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
@@ -390,7 +390,23 @@ class ZeroNet(Callable.WithHelp):
 		if site is None:
 			path = "%s/content.db" % self.getDataDirectory()
 		else:
-			raise NotImplementedError
+			try:
+				with open("%s/%s/content.json" % (self.getDataDirectory(), site), "r") as f:
+					pass
+			except IOError as e:
+				sys.stderr.write("No site %s\n" % site)
+				return 1
+
+			try:
+				with open("%s/%s/dbschema.json" % (self.getDataDirectory(), site), "r") as f:
+					dbschema = json.loads(f.read())
+					path = "%s/%s/%s" % (self.getDataDirectory(), site, dbschema["db_file"])
+			except IOError as e:
+				sys.stderr.write("No database in site %s\n" % site)
+				return 1
+			except (ValueError, KeyError) as e:
+				sys.stderr.write("Malformed dbschema.json\n")
+				return 1
 
 		try:
 			rows = Site.sqlQuery(path, query)
