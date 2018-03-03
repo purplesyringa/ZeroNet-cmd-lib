@@ -214,6 +214,7 @@ class ZeroNet(Callable.WithHelp):
 			account certs list          Get list of certs
 			account certs address       Get auth_address of a cert
 			account certs privatekey    Get auth_privatekey of a cert
+			account certs username      Get user name of a cert
 		"""
 
 		raise Callable.SubCommand
@@ -258,6 +259,23 @@ class ZeroNet(Callable.WithHelp):
 
 		if cert in certs:
 			print certs[cert]["auth_privatekey"]
+		else:
+			sys.stderr.write("No cert %s\n" % cert)
+			return 1
+
+	def actionAccountCertsUsername(self, cert):
+		"""
+			Get user name of a cert
+
+			Usage:
+			account certs username      Print auth_user_name of a certificate
+			<cert>
+		"""
+
+		certs = self.getCurrentUser()["certs"]
+
+		if cert in certs:
+			print certs[cert]["auth_user_name"]
 		else:
 			sys.stderr.write("No cert %s\n" % cert)
 			return 1
