@@ -17,6 +17,8 @@ class Callable(object):
 		pass
 	class Redirect(Exception):
 		pass
+	class Error(Exception):
+		pass
 
 	def __init__(self, args):
 		self.call("", args)
@@ -28,16 +30,14 @@ class Callable(object):
 			handler = getattr(self, "action" + "".join(map(lambda part: part[0].upper() + part[1:] if part != "" else "", cmd.split(" "))))
 		except AttributeError:
 			all_commands = [name[6].lower() + name[7:] for name in dir(self) if name.startswith("action") and len(name) > 6]
-			sys.stderr.write("Unknown command '%s'. Allowed commands are: %s\n" % (cmd, ", ".join(all_commands)))
-			return
+			raise Callable.Error("Unknown command '%s'. Allowed commands are: %s" % (cmd, ", ".join(all_commands)))
 
 		if self.checkCall(cmd, handler, args):
 			try:
 				self.callArgs(handler, args)
 			except Callable.SubCommand as e:
 				if len(args) == 0:
-					sys.stderr.write("'%s' command is not a command but has subcommands.\n" % cmd)
-					return
+					raise Callable.Error("'%s' command is not a command but has subcommands." % cmd)
 
 				if len(tuple(e)) == 0:
 					# Remove first argument and call it
@@ -49,8 +49,7 @@ class Callable(object):
 				if len(tuple(e)) == 0:
 					# Remove first argument and call it (as SubCommand)
 					if len(args) == 0:
-						sys.stderr.write("'%s' command is not a command but has subcommands.\n" % cmd)
-						return
+						raise Callable.Error("'%s' command is not a command but has subcommands." % cmd)
 					self.call("%s %s" % (cmd, args[0]), args[1:])
 				elif len(tuple(e)) == 1:
 					# Call given value
@@ -73,9 +72,7 @@ class Callable(object):
 			default_args = map(lambda arg: "%s=%s" % arg, default_args)
 			expected_args = expected_args[:-len(default_args)] + default_args
 
-		sys.stderr.write("Allowed arguments: %s\n" % ", ".join(expected_args))
-
-		return False
+		raise Callable.Error("Allowed arguments: %s" % ", ".join(expected_args))
 
 	def checkArgs(self, cmd, func, argv):
 		args, kwargs = self.parseArgs(argv)
@@ -101,8 +98,7 @@ class Callable(object):
 			else:
 				# Passed to *args
 				if varargs is None:
-					sys.stderr.write("Too many positional arguments passed to '%s': expected at most %s, got %s.\n" % (cmd, len(expected_args), len(args)))
-					return False
+					raise Callable.Error("Too many positional arguments passed to '%s': expected at most %s, got %s." % (cmd, len(expected_args), len(args)))
 				else:
 					resulting_args[varargs].append(value)
 
@@ -110,23 +106,20 @@ class Callable(object):
 		handled_kwargs = []
 		for name, value in kwargs.iteritems():
 			if name in handled_kwargs:
-				sys.stderr.write("'%s' was passed to '%s' as named argument several times.\n" % (name, cmd))
-				return False
+				raise Callable.Error("'%s' was passed to '%s' as named argument several times." % (name, cmd))
 
 			handled_kwargs.append(name)
 
 			if name in expected_args:
 				# Passed just as argument
 				if name in resulting_args:
-					sys.stderr.write("'%s' was passed to '%s' as both positional argument and named.\n" % (name, cmd))
-					return False
+					raise Callable.Error("'%s' was passed to '%s' as both positional argument and named." % (name, cmd))
 
 				resulting_args[name] = value
 			else:
 				# Passed to **kwargs
 				if keywords is None:
-					sys.stderr.write("Unknown named argument '%s' passed to '%s'.\n" % (name, cmd))
-					return False
+					raise Callable.Error("Unknown named argument '%s' passed to '%s'." % (name, cmd))
 				else:
 					resulting_args[keywords][name] = value
 
@@ -139,8 +132,7 @@ class Callable(object):
 		# Check that all the arguments were passed
 		for name in expected_args:
 			if name not in resulting_args:
-				sys.stderr.write("Argument '%s' was not passed to '%s'.\n" % (name, cmd))
-				return False
+				raise Callable.Error("Argument '%s' was not passed to '%s'." % (name, cmd))
 
 		return True
 
