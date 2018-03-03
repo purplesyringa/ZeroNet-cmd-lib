@@ -1,8 +1,11 @@
-import websocket, sys, re, json
+import socket, websocket, sys, re, json
 
 class ZeroWebSocket(object):
 	def __init__(self, wrapper_key, address="127.0.0.1:43110", secure=False):
-		self.ws = websocket.create_connection("%s://%s/Websocket?wrapper_key=%s" % ("wss" if secure else "ws", address, wrapper_key))
+		try:
+			self.ws = websocket.create_connection("%s://%s/Websocket?wrapper_key=%s" % ("wss" if secure else "ws", address, wrapper_key))
+		except socket.error as e:
+			raise ZeroWebSocket.Error("Cannot open socket.")
 
 		self.next_id = 1000000
 
@@ -23,7 +26,11 @@ class ZeroWebSocket(object):
 		self.ws.send(json.dumps(data))
 
 		while True:
-			response = json.loads(self.ws.recv())
+			try:
+				response = json.loads(self.ws.recv())
+			except websocket.WebSocketConnectionClosedException:
+				raise ZeroWebSocket.Error("Connection terminated.")
+
 			if response["cmd"] == "response" and response["to"] == self.next_id:
 				self.next_id += 1
 
