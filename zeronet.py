@@ -147,6 +147,7 @@ class ZeroNet(Callable.WithHelp):
 			Subcommands:
 			account list                Get list of addresses
 			account master              Get master_seed of account
+			account choose              Choose account for actions
 		"""
 
 		raise Callable.SubCommand
@@ -180,6 +181,22 @@ class ZeroNet(Callable.WithHelp):
 		except KeyError:
 			sys.stderr.write("No account %s\n" % address)
 			return 1
+
+	def actionAccountChoose(self, address):
+		"""
+			Choose account for actions
+
+			Usage:
+			account choose <address>    Use <address> account for all actions
+		"""
+
+		try:
+			User.get_user(config["data_directory"], address)
+		except KeyError:
+			sys.stderr.write("No account %s\n" % address)
+			return 1
+
+		config.set("account.current", address)
 
 try:
 	sys.exit(ZeroNet(argv))
