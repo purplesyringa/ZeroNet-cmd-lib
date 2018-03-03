@@ -133,4 +133,7 @@ class ZeroNet(Callable.WithHelp):
 			except ZeroWebSocket.Error as e:
 				sys.stderr.write("%s\n" % e)
 
-ZeroNet(argv)
+try:
+	ZeroNet(argv)
+except config.AttributeError as e:
+	sys.stderr.write("%s\n" % e)

@@ -11,6 +11,9 @@ def recursive_dir(obj, prefix=""):
 	return result
 
 class Config(object):
+	class AttributeError(AttributeError):
+		pass
+
 	def __init__(self, path):
 		self.__dict__["path"] = path
 
@@ -20,8 +23,10 @@ class Config(object):
 			with open(self.path, "r") as f:
 				config = json.loads(f.read())
 				return config[name]
+		except KeyError, AttributeError:
+			raise Config.AttributeError("No '%s' config variable" % name)
 		except IOError:
-			raise AttributeError("No config file and therefore no '%s' attribute" % name)
+			raise Config.AttributeError("No config file and therefore no '%s' attribute" % name)
 	def __getitem__(self, name):
 		return self.__getattr__(name)
 
