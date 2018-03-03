@@ -6,6 +6,7 @@ from lib.args import argv
 from lib.config import config
 import zeronet_lib.site as Site
 import zeronet_lib.user as User
+import zeronet_lib.instance as Instance
 from zeronet_lib.zerowebsocket import ZeroWebSocket
 
 class ZeroNet(Callable.WithHelp):
@@ -298,12 +299,7 @@ class ZeroNet(Callable.WithHelp):
 			instance running            Return 0 if running, 1 otherwise
 		"""
 
-		try:
-			with open("%s/lock.pid" % config["data_directory"], "w") as f:
-				f.write("0")
-				return 1
-		except IOError:
-			return 0
+		return 1 if Instance.isRunning(config["data_directory"]) else 0
 
 	def actionInstancePid(self):
 		"""
@@ -313,19 +309,12 @@ class ZeroNet(Callable.WithHelp):
 			instance pid                Return 0 and print the PID if running, return 1 otherwise
 		"""
 
-		import psutil
-
-		lock_file = os.path.realpath("%s/lock.pid" % config["data_directory"]).encode("utf-8")
-
-		for proc in psutil.process_iter():
-			try:
-				if lock_file in (x.path for x in proc.open_files()):
-					print proc.pid
-					return 0
-			except psutil.Error as e:
-				pass
-
-		return 1
+		pid = Instance.getPid(config["data_directory"])
+		if pid is None:
+			return 1
+		else:
+			print pid
+			return 0
 
 try:
 	sys.exit(ZeroNet(argv))
