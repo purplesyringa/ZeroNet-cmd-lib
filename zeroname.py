@@ -5,6 +5,7 @@ import sqlite3, json
 from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
+import zeronet_lib.site as Site
 import zeronet_lib.addresses as Addresses
 
 class ZeroName(Callable.WithHelp):
@@ -28,15 +29,22 @@ class ZeroName(Callable.WithHelp):
 		else:
 			raise Callable.SubCommand
 
-	def actionResolve(self, address):
+	def actionResolve(self, domain):
 		"""
 			Get address of a site by its domain
 
 			Usage:
-			resolve <address>           Print address of the site
+			resolve <domain>            Print address of the site
 		"""
 
-		raise NotImplementedError
+		try:
+			print Site.findByDomain("%s/%s/data/names.json" % (self.getDataDirectory(), config.get("zeroname.registry", Addresses.ZeroName)), domain)
+		except KeyError as e:
+			sys.stderr.write("%s\n" % e[0])
+			return 1
+
+	def getDataDirectory(self):
+		return config.get("data_directory", "%s/data" % config["root_directory"])
 
 try:
 	sys.exit(ZeroName(argv))
