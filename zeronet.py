@@ -140,7 +140,7 @@ class ZeroNet(Callable.WithHelp):
 
 		try:
 			with self.connect(site) as ws:
-				print ws.send(cmd, *args, **kwargs).encode("utf-8")
+				print unicode(ws.send(cmd, *args, **kwargs)).encode("utf-8")
 				return 0
 		except ZeroWebSocket.Error as e:
 			sys.stderr.write("%s\n" % "\n".join(e))
