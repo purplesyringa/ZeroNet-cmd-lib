@@ -103,9 +103,9 @@ class ZeroNet(Callable.WithHelp):
 
 		try:
 			if reverse == False:
-				print Site.getWrapperkey(config["data_directory"], search)
+				print Site.getWrapperkey(self.getDataDirectory(), search)
 			else:
-				print Site.findByWrapperkey(config["data_directory"], search)
+				print Site.findByWrapperkey(self.getDataDirectory(), search)
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
 			return 1
@@ -126,7 +126,7 @@ class ZeroNet(Callable.WithHelp):
 			return 2
 
 		try:
-			wrapper_key = Site.getWrapperkey(config["data_directory"], site)
+			wrapper_key = Site.getWrapperkey(self.getDataDirectory(), site)
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
 			return 1
@@ -164,7 +164,7 @@ class ZeroNet(Callable.WithHelp):
 			account list                Print newline-separated list of addresses
 		"""
 
-		print "\n".join(User.getUsers(config["data_directory"]))
+		print "\n".join(User.getUsers(self.getDataDirectory()))
 
 	def actionAccountMaster(self):
 		"""
@@ -177,7 +177,7 @@ class ZeroNet(Callable.WithHelp):
 		address = self.getCurrentAccount()
 
 		try:
-			print User.getUser(config["data_directory"], address)["master_seed"]
+			print User.getUser(self.getDataDirectory(), address)["master_seed"]
 		except KeyError:
 			sys.stderr.write("No account %s\n" % address)
 			return 1
@@ -186,12 +186,12 @@ class ZeroNet(Callable.WithHelp):
 		address = config.get("account.current", None)
 
 		if address is None:
-			address = User.getUsers(config["data_directory"])[0]
+			address = User.getUsers(self.getDataDirectory())[0]
 			config.set("account.current", address)
 
 		return address
 	def getCurrentUser(self):
-		return User.getUser(config["data_directory"], self.getCurrentAccount())
+		return User.getUser(self.getDataDirectory(), self.getCurrentAccount())
 
 	def actionAccountChoose(self, address):
 		"""
@@ -202,7 +202,7 @@ class ZeroNet(Callable.WithHelp):
 		"""
 
 		try:
-			User.getUser(config["data_directory"], address)
+			User.getUser(self.getDataDirectory(), address)
 		except KeyError:
 			sys.stderr.write("No account %s\n" % address)
 			return 1
@@ -301,7 +301,7 @@ class ZeroNet(Callable.WithHelp):
 			instance running            Return 0 if running, 1 otherwise
 		"""
 
-		return 1 if Instance.isRunning(config["data_directory"]) else 0
+		return 1 if Instance.isRunning(self.getDataDirectory()) else 0
 
 	def actionInstancePid(self):
 		"""
@@ -311,7 +311,7 @@ class ZeroNet(Callable.WithHelp):
 			instance pid                Return 0 and print the PID if running, return 1 otherwise
 		"""
 
-		pid = Instance.getPid(config["data_directory"])
+		pid = Instance.getPid(self.getDataDirectory())
 		if pid is None:
 			return 1
 		else:
@@ -330,7 +330,7 @@ class ZeroNet(Callable.WithHelp):
 
 		if not force and signal is None:
 			try:
-				wrapper_key = Site.getWrapperkey(config["data_directory"], config.get("homepage", Addresses.ZeroHello))
+				wrapper_key = Site.getWrapperkey(self.getDataDirectory(), config.get("homepage", Addresses.ZeroHello))
 			except KeyError as e:
 				sys.stderr.write("Could not get wrapper key of ZeroHello. Try 'instance shutdown --force'.\n")
 				return 1
@@ -352,12 +352,15 @@ class ZeroNet(Callable.WithHelp):
 			if signal is None:
 				signal = os_signal.SIGINT
 
-			pid = Instance.getPid(config["data_directory"])
+			pid = Instance.getPid(self.getDataDirectory())
 			if pid is None:
 				sys.stderr.write("Could not find ZeroNet process.\n")
 				return 1
 
 			os.kill(pid, signal)
+
+	def getDataDirectory(self):
+		return config.get("data_directory", "%s/data" % config["root_directory"])
 
 try:
 	sys.exit(ZeroNet(argv))
