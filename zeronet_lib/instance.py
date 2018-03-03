@@ -1,4 +1,4 @@
-import psutil, os
+import psutil, os, sys, subprocess
 
 def isRunning(data_directory):
 	try:
@@ -20,3 +20,7 @@ def getPid(data_directory):
 			pass
 
 	return None
+
+def start(root_directory):
+	with open(os.devnull, "w") as null:
+		subprocess.Popen([sys.executable, "%s/start.py" % root_directory], stdout=null, stderr=null)

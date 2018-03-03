@@ -289,6 +289,7 @@ class ZeroNet(Callable.WithHelp):
 			instance running            Check whether ZeroNet instance is running
 			instance pid                Get PID of ZeroNet instance
 			instance shutdown           Shutdown ZeroNet instance
+			instance start              Start ZeroNet instance
 		"""
 
 		raise Callable.SubCommand
@@ -358,6 +359,9 @@ class ZeroNet(Callable.WithHelp):
 				return 1
 
 			os.kill(pid, signal)
+
+	def actionInstanceStart(self):
+		Instance.start(config["root_directory"])
 
 	def getDataDirectory(self):
 		return config.get("data_directory", "%s/data" % config["root_directory"])
