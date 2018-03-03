@@ -131,7 +131,7 @@ class ZeroNet(Callable.WithHelp):
 			try:
 				print ws.send(cmd, *args, **kwargs)
 			except ZeroWebSocket.Error as e:
-				sys.stderr.write("%s\n" % e)
+				sys.stderr.write("%s\n" % "\n".join(e))
 
 try:
 	ZeroNet(argv)
