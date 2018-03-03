@@ -149,7 +149,7 @@ class ZeroNet(Callable.WithHelp):
 
 		try:
 			with ZeroWebSocket(wrapper_key, "%s:%s" % (address, port), secure) as ws:
-				print ws.send(cmd, *args, **kwargs)
+				print ws.send(cmd, *args, **kwargs).encode("utf-8")
 				return 0
 		except ZeroWebSocket.Error as e:
 			sys.stderr.write("%s\n" % "\n".join(e))
