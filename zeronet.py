@@ -57,6 +57,7 @@ class ZeroNet(Callable.WithHelp):
 			homepage                    (ZeroHello address)     ZeroNet homepage
 			root_directory                                      Path to ZeroNet root directory (the one having 'src')
 			data_directory              (root_directory)/data   Path to data directory
+			zeroname.registry           (ZeroName address)      Domain name registry site
 		"""
 
 		raise Callable.SubCommand
