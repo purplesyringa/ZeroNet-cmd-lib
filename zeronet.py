@@ -5,6 +5,7 @@ from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
 import zeronet_lib.site as Site
+from zeronet_lib.zerowebsocket import ZeroWebSocket
 
 class ZeroNet(Callable.WithHelp):
 	"""
@@ -12,6 +13,7 @@ class ZeroNet(Callable.WithHelp):
 		help                        Print this help
 		config                      Get or set config values
 		wrapperkey                  Return wrapper key of a site or find a site by wrapper key
+		socket                      Send request to ZeroWebSocket
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -99,5 +101,36 @@ class ZeroNet(Callable.WithHelp):
 				print Site.find_by_wrapperkey(config["data_directory"], search)
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
+
+	def actionSocket(self, site, cmd, *args, **kwargs):
+		"""
+			Send request to ZeroWebSocket
+
+			Usage:
+			socket <site> <cmd>         Send command without arguments to site <site>
+			socket <site> <cmd> 1 2 3   Send command <cmd> with arguments 1, 2 and 3
+			socket <site> <cmd> --1 2   Send command <cmd> with arguments 1=2 and 3=True
+			                    --3
+		"""
+
+		if len(args) > 0 and len(kwargs) > 0:
+			sys.stderr.write("ZeroWebSocket doesn't accept requests with both positional arguments and named arguments used.\n")
+			return
+
+		try:
+			wrapper_key = Site.get_wrapperkey(config["data_directory"], site)
+		except KeyError as e:
+			sys.stderr.write("%s\n" % e[0])
+			return
+
+		address = config.get("server.address", "127.0.0.1")
+		port = config.get("server.port", "43110")
+		secure = config.get("server.secure", False)
+
+		with ZeroWebSocket(wrapper_key, "%s:%s" % (address, port), secure) as ws:
+			try:
+				print ws.send(cmd, *args, **kwargs)
+			except ZeroWebSocket.Error as e:
+				sys.stderr.write("%s\n" % e)
 
 ZeroNet(argv)
