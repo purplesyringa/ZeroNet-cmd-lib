@@ -23,7 +23,7 @@ class Config(object):
 			with open(self.path, "r") as f:
 				config = json.loads(f.read())
 				return config[name]
-		except KeyError, AttributeError:
+		except (KeyError, AttributeError):
 			raise Config.AttributeError("No '%s' config variable" % name)
 		except IOError:
 			raise Config.AttributeError("No config file and therefore no '%s' attribute" % name)
@@ -40,7 +40,7 @@ class Config(object):
 				val = val[part]
 
 			return val
-		except KeyError, AttributeError:
+		except (KeyError, AttributeError, Config.AttributeError):
 			return default
 
 	# Write single value
