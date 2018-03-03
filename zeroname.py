@@ -40,7 +40,7 @@ class ZeroName(Callable.WithHelp):
 		"""
 
 		try:
-			print Site.findByDomain("%s/%s/data/names.json" % (self.getDataDirectory(), config.get("zeroname.registry", Addresses.ZeroName)), domain)
+			print Site.findByDomain("%s/%s/data/names.json" % (self.getDataDirectory(), self.getAddress()), domain)
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
 			return 1
@@ -54,7 +54,7 @@ class ZeroName(Callable.WithHelp):
 		"""
 
 		try:
-			print "\n".join(Site.getDomains("%s/%s/data/names.json" % (self.getDataDirectory(), config.get("zeroname.registry", Addresses.ZeroName)), address))
+			print "\n".join(Site.getDomains("%s/%s/data/names.json" % (self.getDataDirectory(), self.getAddress()), address))
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
 			return 1
@@ -68,19 +68,21 @@ class ZeroName(Callable.WithHelp):
 		"""
 
 		try:
-			address = Site.findByDomain("%s/%s/data/names.json" % (self.getDataDirectory(), config.get("zeroname.registry", Addresses.ZeroName)), domain)
+			address = Site.findByDomain("%s/%s/data/names.json" % (self.getDataDirectory(), self.getAddress()), domain)
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
 			return 1
 
 		try:
-			print "\n".join(Site.getDomains("%s/%s/data/names.json" % (self.getDataDirectory(), config.get("zeroname.registry", Addresses.ZeroName)), address))
+			print "\n".join(Site.getDomains("%s/%s/data/names.json" % (self.getDataDirectory(), self.getAddress()), address))
 		except KeyError as e:
 			sys.stderr.write("%s\n" % e[0])
 			return 1
 
 	def getDataDirectory(self):
 		return config.get("data_directory", "%s/data" % config["root_directory"])
+	def getAddress(self):
+		return config.get("zeroname.registry", Addresses.ZeroName)
 
 try:
 	sys.exit(ZeroName(argv))
