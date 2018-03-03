@@ -17,6 +17,7 @@ class ZeroNet(Callable.WithHelp):
 		socket                      Send request to ZeroWebSocket
 		account                     Configure accounts
 		certs                       Configure certificates
+		instance                    Get info about ZeroNet instance
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -276,6 +277,32 @@ class ZeroNet(Callable.WithHelp):
 		else:
 			sys.stderr.write("No cert %s\n" % cert)
 			return 1
+
+
+	def actionInstance(self, *args, **kwargs):
+		"""
+			Get info about ZeroNet instance
+
+			Subcommands:
+			instance running            Check whether ZeroNet instance is running
+		"""
+
+		raise Callable.SubCommand
+
+	def actionInstanceRunning(self):
+		"""
+			Check whether ZeroNet instance is running
+
+			Usage:
+			instance running            Return 0 if running, 1 otherwise
+		"""
+
+		try:
+			with open("%s/lock.pid" % config["data_directory"], "w") as f:
+				f.write("0")
+				return 1
+		except IOError:
+			return 0
 
 try:
 	sys.exit(ZeroNet(argv))
