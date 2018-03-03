@@ -1,4 +1,4 @@
-import json
+import json, sqlite3
 
 def getWrapperkey(data_directory, address):
 	with open("%s/sites.json" % data_directory) as f:
@@ -17,3 +17,8 @@ def findByWrapperkey(data_directory, wrapper_key):
 				return address
 
 		raise KeyError("No wrapper key %s" % wrapper_key)
+
+def sqlQuery(path, query):
+	conn = sqlite3.connect(path)
+	cursor = conn.cursor()
+	return cursor.execute(query)
