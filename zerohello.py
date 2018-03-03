@@ -35,6 +35,7 @@ class ZeroHello(Callable.WithHelp):
 
 			Subcommands:
 			site pause                  Pause site
+			site resume                 Resume site
 		"""
 
 		raise Callable.SubCommand
@@ -50,6 +51,21 @@ class ZeroHello(Callable.WithHelp):
 		try:
 			with self.connect(self.getAddress()) as ws:
 				ws.send("sitePause", address=address)
+		except ZeroWebSocket.Error as e:
+			sys.stderr.write("%s\n" % "\n".join(e))
+			return 1
+
+	def actionSiteResume(self, address):
+		"""
+			Resume site
+
+			Usage:
+			site resume <address>       Resume seeding <address>
+		"""
+
+		try:
+			with self.connect(self.getAddress()) as ws:
+				ws.send("siteResume", address=address)
 		except ZeroWebSocket.Error as e:
 			sys.stderr.write("%s\n" % "\n".join(e))
 			return 1
