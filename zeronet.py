@@ -212,6 +212,7 @@ class ZeroNet(Callable.WithHelp):
 
 			Subcommands:
 			account certs list          Get list of certs
+			account certs address       Get auth_address of a cert
 		"""
 
 		raise Callable.SubCommand
@@ -225,6 +226,22 @@ class ZeroNet(Callable.WithHelp):
 		"""
 
 		print "\n".join(self.getCurrentUser()["certs"].keys())
+
+	def actionAccountCertsAddress(self, cert):
+		"""
+			Get auth_address of a cert
+
+			Usage:
+			account certs address       Print auth_address of a certificate
+		"""
+
+		certs = self.getCurrentUser()["certs"]
+
+		if cert in certs:
+			print certs[cert]["auth_address"]
+		else:
+			sys.stderr.write("No cert %s\n" % cert)
+			return 1
 
 try:
 	sys.exit(ZeroNet(argv))
