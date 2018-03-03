@@ -141,6 +141,7 @@ try:
 	sys.exit(ZeroNet(argv))
 except config.AttributeError as e:
 	sys.stderr.write("%s\n" % e)
+	sys.exit(1)
 except Callable.Error as e:
 	sys.stderr.write("%s\n" % e)
 	sys.exit(2)
