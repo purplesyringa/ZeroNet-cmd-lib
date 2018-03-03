@@ -15,7 +15,7 @@ class ZeroNet(Callable.WithHelp):
 		config                      Get or set config values
 		wrapperkey                  Return wrapper key of a site or find a site by wrapper key
 		socket                      Send request to ZeroWebSocket
-		user                        Configure users
+		account                     Configure accounts
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -140,25 +140,44 @@ class ZeroNet(Callable.WithHelp):
 				return 1
 
 
-	def actionUser(self, *args, **kwargs):
+	def actionAccount(self, *args, **kwargs):
 		"""
-			Configure users
+			Configure accounts
 
 			Subcommands:
-			user list                   Get list of addresses
+			account list                Get list of addresses
+			account master              Get master_seed of account
 		"""
 
 		raise Callable.SubCommand
 
-	def actionUserList(self):
+	def actionAccountList(self):
 		"""
 			Get list of addresses
 
 			Usage:
-			user list                   Print newline-separated list of addresses
+			account list                Print newline-separated list of addresses
 		"""
 
 		print "\n".join(User.get_users(config["data_directory"]))
+
+	def actionAccountMaster(self, address=None):
+		"""
+			Get master_seed of account
+
+			Usage:
+			account master <address>    Print master_seed of account <address>
+			account master              Print master_seed of the first account
+		"""
+
+		if address is None:
+			address = User.get_users(config["data_directory"])[0]
+
+		try:
+			print User.get_user(config["data_directory"], address)["master_seed"]
+		except KeyError:
+			sys.stderr.write("No account %s\n" % address)
+			return 1
 
 try:
 	sys.exit(ZeroNet(argv))

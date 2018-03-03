@@ -6,3 +6,6 @@ def get_users_json(data_directory):
 
 def get_users(data_directory):
 	return get_users_json(data_directory).keys()
+
+def get_user(data_directory, address):
+	return get_users_json(data_directory)[address]
