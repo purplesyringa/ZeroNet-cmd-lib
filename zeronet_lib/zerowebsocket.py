@@ -1,5 +1,4 @@
-import websocket, sys
-import json
+import websocket, sys, re, json
 
 class ZeroWebSocket(object):
 	def __init__(self, wrapper_key, address="127.0.0.1:43110", secure=False):
@@ -30,7 +29,7 @@ class ZeroWebSocket(object):
 				return response["result"]
 			elif response["cmd"] == "error":
 				self.next_id += 1
-				raise ZeroWebSocket.Error(response["params"])
+				raise ZeroWebSocket.Error(*map(lambda x: re.sub(r"<[^<]+?>", "", x), response["params"].split("<br>")))
 
 	class Error(Exception):
 		pass
