@@ -148,6 +148,7 @@ class ZeroNet(Callable.WithHelp):
 			account list                Get list of addresses
 			account master              Get master_seed of account
 			account choose              Choose account for actions
+			account certs               Configure certificates
 		"""
 
 		raise Callable.SubCommand
@@ -170,17 +171,24 @@ class ZeroNet(Callable.WithHelp):
 			account master              Print master_seed of current account
 		"""
 
-		address = config.get("account.current", None)
-
-		if address is None:
-			address = User.get_users(config["data_directory"])[0]
-			config.set("account.current", address)
+		address = self.getCurrentAccount()
 
 		try:
 			print User.get_user(config["data_directory"], address)["master_seed"]
 		except KeyError:
 			sys.stderr.write("No account %s\n" % address)
 			return 1
+
+	def getCurrentAccount(self):
+		address = config.get("account.current", None)
+
+		if address is None:
+			address = User.get_users(config["data_directory"])[0]
+			config.set("account.current", address)
+
+		return address
+	def getCurrentUser(self):
+		return User.get_user(config["data_directory"], self.getCurrentAccount())
 
 	def actionAccountChoose(self, address):
 		"""
@@ -197,6 +205,26 @@ class ZeroNet(Callable.WithHelp):
 			return 1
 
 		config.set("account.current", address)
+
+	def actionAccountCerts(self, *args, **kwargs):
+		"""
+			Configure certificates
+
+			Subcommands:
+			account certs list          Get list of certs
+		"""
+
+		raise Callable.SubCommand
+
+	def actionAccountCertsList(self):
+		"""
+			Get list of certs
+
+			Usage:
+			account certs list          Print newline-separated names of auth certs
+		"""
+
+		print "\n".join(self.getCurrentUser()["certs"].keys())
 
 try:
 	sys.exit(ZeroNet(argv))
