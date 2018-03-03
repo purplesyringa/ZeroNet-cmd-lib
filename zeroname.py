@@ -14,6 +14,7 @@ class ZeroName(Callable.WithHelp):
 		help                        Print this help
 		resolve                     Get address of a site by its domain
 		lookup                      Get site domain(s) by address
+		alias                       Find aliases of a domain
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -51,6 +52,26 @@ class ZeroName(Callable.WithHelp):
 			Usage:
 			lookup <address>            Print domain(s) of the site
 		"""
+
+		try:
+			print "\n".join(Site.getDomains("%s/%s/data/names.json" % (self.getDataDirectory(), config.get("zeroname.registry", Addresses.ZeroName)), address))
+		except KeyError as e:
+			sys.stderr.write("%s\n" % e[0])
+			return 1
+
+	def actionAlias(self, domain):
+		"""
+			Find aliases of a domain
+
+			Usage:
+			alias <domain>              Print all domains linking to the same domain as <domain>
+		"""
+
+		try:
+			address = Site.findByDomain("%s/%s/data/names.json" % (self.getDataDirectory(), config.get("zeroname.registry", Addresses.ZeroName)), domain)
+		except KeyError as e:
+			sys.stderr.write("%s\n" % e[0])
+			return 1
 
 		try:
 			print "\n".join(Site.getDomains("%s/%s/data/names.json" % (self.getDataDirectory(), config.get("zeroname.registry", Addresses.ZeroName)), address))
