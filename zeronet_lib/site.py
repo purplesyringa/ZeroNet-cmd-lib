@@ -41,7 +41,7 @@ def getDomains(path, address):
 def findByDomain(path, domain):
 	with open(path, "r") as f:
 		names = json.loads(f.read())
-		if domain in names:
-			return names[domain]
+		if domain.lower() in names:
+			return names[domain.lower()]
 		else:
 			raise KeyError("No domain %s" % domain)
