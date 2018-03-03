@@ -24,14 +24,17 @@ def sqlQuery(path, query):
 	return cursor.execute(query)
 
 
-def getDomains(path, address):
+def getDomains(path, address=None):
 	with open(path, "r") as f:
 		names = json.loads(f.read())
 
-		domains = []
-		for domain, result in names.iteritems():
-			if result == address:
-				domains.append(domain)
+		if address is None:
+			domains = names.keys()
+		else:
+			domains = []
+			for domain, result in names.iteritems():
+				if result == address:
+					domains.append(domain)
 
 		if len(domains) == 0:
 			raise KeyError("%s has no domains" % address)

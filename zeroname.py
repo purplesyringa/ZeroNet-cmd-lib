@@ -12,6 +12,7 @@ class ZeroName(Callable.WithHelp):
 	"""
 		Commands:
 		help                        Print this help
+		list                        Print all domains
 		resolve                     Get address of a site by its domain
 		lookup                      Get site domain(s) by address
 		alias                       Find aliases of a domain
@@ -30,6 +31,20 @@ class ZeroName(Callable.WithHelp):
 				return 2
 		else:
 			raise Callable.SubCommand
+
+	def actionList(self):
+		"""
+			Print all domains
+
+			Usage:
+			list                        Print newline-separated list of domains
+		"""
+
+		try:
+			print "\n".join(Site.getDomains("%s/%s/data/names.json" % (self.getDataDirectory(), self.getAddress())))
+		except KeyError as e:
+			sys.stderr.write("%s\n" % e[0])
+			return 1
 
 	def actionResolve(self, domain):
 		"""
