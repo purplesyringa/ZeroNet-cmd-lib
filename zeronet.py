@@ -161,17 +161,19 @@ class ZeroNet(Callable.WithHelp):
 
 		print "\n".join(User.get_users(config["data_directory"]))
 
-	def actionAccountMaster(self, address=None):
+	def actionAccountMaster(self):
 		"""
 			Get master_seed of account
 
 			Usage:
-			account master <address>    Print master_seed of account <address>
-			account master              Print master_seed of the first account
+			account master              Print master_seed of current account
 		"""
+
+		address = config.get("account.current", None)
 
 		if address is None:
 			address = User.get_users(config["data_directory"])[0]
+			config.set("account.current", address)
 
 		try:
 			print User.get_user(config["data_directory"], address)["master_seed"]
