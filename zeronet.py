@@ -139,17 +139,7 @@ class ZeroNet(Callable.WithHelp):
 			return 2
 
 		try:
-			wrapper_key = Site.getWrapperkey(self.getDataDirectory(), site)
-		except KeyError as e:
-			sys.stderr.write("%s\n" % e[0])
-			return 1
-
-		address = config.get("server.address", "127.0.0.1")
-		port = config.get("server.port", "43110")
-		secure = config.get("server.secure", False)
-
-		try:
-			with ZeroWebSocket(wrapper_key, "%s:%s" % (address, port), secure) as ws:
+			with self.connect(site) as ws:
 				print ws.send(cmd, *args, **kwargs).encode("utf-8")
 				return 0
 		except ZeroWebSocket.Error as e:
@@ -344,23 +334,13 @@ class ZeroNet(Callable.WithHelp):
 
 		if not force and signal is None:
 			try:
-				wrapper_key = Site.getWrapperkey(self.getDataDirectory(), config.get("homepage", Addresses.ZeroHello))
-			except KeyError as e:
-				sys.stderr.write("Could not get wrapper key of ZeroHello. Try 'instance shutdown --force'.\n")
-				return 1
-
-			address = config.get("server.address", "127.0.0.1")
-			port = config.get("server.port", "43110")
-			secure = config.get("server.secure", False)
-
-			try:
-				with ZeroWebSocket(wrapper_key, "%s:%s" % (address, port), secure) as ws:
+				with self.connect(config.get("homepage", Addresses.ZeroHello)) as ws:
 					try:
 						ws.send("serverShutdown")
 					except ZeroWebSocket.Error as e:
 						pass
-			except ZeroWebSocket.Error as e:
-				sys.stderr.write("%s\n" % e)
+			except KeyError as e:
+				sys.stderr.write("Could not get wrapper key of ZeroHello. Try 'instance shutdown --force'.\n")
 				return 1
 		else:
 			if signal is None:
@@ -417,6 +397,16 @@ class ZeroNet(Callable.WithHelp):
 
 		for row in rows:
 			print "\t".join(map(str, row))
+
+
+	def connect(self, site):
+		wrapper_key = Site.getWrapperkey(self.getDataDirectory(), site)
+
+		address = config.get("server.address", "127.0.0.1")
+		port = config.get("server.port", "43110")
+		secure = config.get("server.secure", False)
+
+		return ZeroWebSocket(wrapper_key, "%s:%s" % (address, port), secure)
 
 try:
 	sys.exit(ZeroNet(argv))
