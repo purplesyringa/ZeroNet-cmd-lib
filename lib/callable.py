@@ -1,5 +1,17 @@
 import sys, inspect
 
+def classAsFunction(cls):
+	if not isinstance(cls, type):
+		return cls
+
+	class Class(cls):
+		def __new__(cls, args):
+			instance = super(Callable, cls).__new__(cls)
+			return instance.__init__(args)
+
+	return Class
+
+@classAsFunction
 class Callable(object):
 	class SubCommand(Exception):
 		pass
