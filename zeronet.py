@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os
+import sys, os, signal as os_signal
 from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
@@ -328,7 +328,7 @@ class ZeroNet(Callable.WithHelp):
 			instance shutdown <signal>  Send signal to ZeroNet process
 		"""
 
-		if not force:
+		if not force and signal is None:
 			try:
 				wrapper_key = Site.getWrapperkey(config["data_directory"], config.get("homepage", Addresses.ZeroHello))
 			except KeyError as e:
@@ -349,7 +349,15 @@ class ZeroNet(Callable.WithHelp):
 				sys.stderr.write("%s\n" % e)
 				return 1
 		else:
-			raise NotImplementedError
+			if signal is None:
+				signal = os_signal.SIGINT
+
+			pid = Instance.getPid(config["data_directory"])
+			if pid is None:
+				sys.stderr.write("Could not find ZeroNet process.\n")
+				return 1
+
+			os.kill(pid, signal)
 
 try:
 	sys.exit(ZeroNet(argv))
