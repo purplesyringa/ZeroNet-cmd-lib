@@ -26,7 +26,11 @@ class ZeroWebSocket(object):
 			response = json.loads(self.ws.recv())
 			if response["cmd"] == "response" and response["to"] == self.next_id:
 				self.next_id += 1
-				return response["result"]
+
+				if response["result"] is not None and "error" in response["result"]:
+					raise ZeroWebSocket.Error(response["result"]["error"])
+				else:
+					return response["result"]
 			elif response["cmd"] == "error":
 				self.next_id += 1
 				raise ZeroWebSocket.Error(*map(lambda x: re.sub(r"<[^<]+?>", "", x), response["params"].split("<br>")))
