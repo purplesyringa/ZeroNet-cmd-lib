@@ -150,13 +150,14 @@ class ZeroHello(Callable.WithHelp):
 			sys.stderr.write("%s\n" % "\n".join(e))
 			return 1
 
-	def actionFeed(self, reverse=False):
+	def actionFeed(self, reverse=False, raw=None):
 		"""
 			Show feed
 
 			Usage:
 			feed                        Display newsfeed
 			feed --reverse              Show new posts first
+			feed --raw <separator=--->  Use machine-readable format and separate items by <separator>
 		"""
 
 		try:
@@ -177,17 +178,22 @@ class ZeroHello(Callable.WithHelp):
 					title, body = row["title"], row["body"]
 					url, site = row["url"], row["site"]
 					feed_type, feed_name = row["type"], row["feed_name"]
-
 					date_added = row["date_added"]
-					date_added = datetime.datetime.fromtimestamp(date_added)
 
-					print "%s on %s" % (feed_name, date_added.strftime("%Y-%m-%d %H:%M:%S"))
-					print "<%s>" % title.encode("utf-8")
+					if raw is None:
+						date_added = datetime.datetime.fromtimestamp(date_added)
 
-					if body:
+						print "%s on %s" % (feed_name.encode("utf-8"), date_added.strftime("%Y-%m-%d %H:%M:%S"))
+						print "<%s>" % title.encode("utf-8")
+
+						if body:
+							print body.encode("utf-8")
+
+						print ""
+					else:
+						print "%s\t%s\t%s\t%s\t%s\t%s" % tuple(map(lambda s: s.encode("utf-8"), [title, url, site, feed_type, feed_name]) + [date_added])
 						print body.encode("utf-8")
-
-					print ""
+						print "---" if raw is True else raw
 		except ZeroWebSocket.Error as e:
 			sys.stderr.write("%s\n" % "\n".join(e))
 			return 1
