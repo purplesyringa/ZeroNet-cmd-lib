@@ -78,6 +78,7 @@ class ZeroHello(Callable.WithHelp):
 			Subcommands:
 			site favorites list         Get all favorite sites
 			site favorites add          Add site to favorites
+			site favorites remove       Remove site from favorites
 		"""
 
 		raise Callable.SubCommand
@@ -115,6 +116,33 @@ class ZeroHello(Callable.WithHelp):
 				if "favorite_sites" not in settings:
 					settings["favorite_sites"] = {}
 				settings["favorite_sites"][address] = True
+
+				ws.send("userSetSettings", settings)
+		except ZeroWebSocket.Error as e:
+			sys.stderr.write("%s\n" % "\n".join(e))
+			return 1
+
+	def actionSiteFavoritesRemove(self, address):
+		"""
+			Remove site from favorites
+
+			Usage:
+			site favorites remove       Remove <address> from favorite sites
+			<address>
+		"""
+
+		try:
+			with self.connect(self.getAddress()) as ws:
+				settings = ws.send("userGetSettings")
+
+				if "favorite_sites" not in settings:
+					settings["favorite_sites"] = {}
+
+				try:
+					del settings["favorite_sites"][address]
+				except KeyError:
+					sys.stderr.write("%s is not in favorites.\n" % address)
+					return 1
 
 				ws.send("userSetSettings", settings)
 		except ZeroWebSocket.Error as e:
