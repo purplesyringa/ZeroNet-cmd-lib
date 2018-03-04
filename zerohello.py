@@ -36,6 +36,7 @@ class ZeroHello(Callable.WithHelp):
 			Subcommands:
 			site pause                  Pause site
 			site resume                 Resume site
+			site favorites              Manage favorite sites
 		"""
 
 		raise Callable.SubCommand
@@ -66,6 +67,33 @@ class ZeroHello(Callable.WithHelp):
 		try:
 			with self.connect(self.getAddress()) as ws:
 				ws.send("siteResume", address=address)
+		except ZeroWebSocket.Error as e:
+			sys.stderr.write("%s\n" % "\n".join(e))
+			return 1
+
+	def actionSiteFavorites(self, *args, **kwargs):
+		"""
+			Manage favorite sites
+
+			Subcommands:
+			site favorites list         Get all favorite sites
+		"""
+
+		raise Callable.SubCommand
+
+	def actionSiteFavoritesList(self):
+		"""
+			Get all favorite sites
+
+			Usage:
+			site favorites list         Print newline-separated favorites
+		"""
+
+		try:
+			with self.connect(self.getAddress()) as ws:
+				settings = ws.send("userGetSettings")
+				favorites = settings.get("favorite_sites", {}).keys()
+				print "\n".join(favorites)
 		except ZeroWebSocket.Error as e:
 			sys.stderr.write("%s\n" % "\n".join(e))
 			return 1
