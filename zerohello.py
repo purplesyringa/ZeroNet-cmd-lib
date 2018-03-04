@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys
+import sys, datetime
 from lib.callable import Callable
 from lib.args import argv
 from lib.config import config
@@ -13,6 +13,7 @@ class ZeroHello(Callable.WithHelp):
 		Commands:
 		help                        Print this help
 		site                        Edit or get some info about site
+		feed                        Show feed
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -145,6 +146,48 @@ class ZeroHello(Callable.WithHelp):
 					return 1
 
 				ws.send("userSetSettings", settings)
+		except ZeroWebSocket.Error as e:
+			sys.stderr.write("%s\n" % "\n".join(e))
+			return 1
+
+	def actionFeed(self, reverse=False):
+		"""
+			Show feed
+
+			Usage:
+			feed                        Display newsfeed
+			feed --reverse              Show new posts first
+		"""
+
+		try:
+			with self.connect(self.getAddress()) as ws:
+				feed = ws.send("feedQuery", 30, 3)
+
+				if "rows" in feed:
+					rows = feed["rows"]
+				else:
+					rows = feed
+
+				if reverse:
+					rows.sort(key=lambda row: -row["date_added"])
+				else:
+					rows.sort(key=lambda row: row["date_added"])
+
+				for row in rows:
+					title, body = row["title"], row["body"]
+					url, site = row["url"], row["site"]
+					feed_type, feed_name = row["type"], row["feed_name"]
+
+					date_added = row["date_added"]
+					date_added = datetime.datetime.fromtimestamp(date_added)
+
+					print "%s on %s" % (feed_name, date_added.strftime("%Y-%m-%d %H:%M:%S"))
+					print "<%s>" % title.encode("utf-8")
+
+					if body:
+						print body.encode("utf-8")
+
+					print ""
 		except ZeroWebSocket.Error as e:
 			sys.stderr.write("%s\n" % "\n".join(e))
 			return 1
