@@ -14,6 +14,7 @@ class ZeroHello(Callable.WithHelp):
 		help                        Print this help
 		site                        Edit or get some info about site
 		feed                        Show feed
+		interactive                 Open interactive mode
 
 		Use 'help <command>' or 'help <command> <subcommand>' for more info
 	"""
@@ -197,6 +198,27 @@ class ZeroHello(Callable.WithHelp):
 		except ZeroWebSocket.Error as e:
 			sys.stderr.write("%s\n" % "\n".join(e))
 			return 1
+
+	def actionInteractive(self):
+		"""
+			Open interactive mode
+
+			Usage:
+			interactive                 Display UI
+		"""
+
+		from clirender.layout import xml_parser, Layout
+		from clirender.layout.libs import render, getAdditionalNodes
+
+		with open("zerohello.xml") as f:
+			xml = f.read()
+
+		libs = xml_parser.gatherLibs(xml)
+		nodes = getAdditionalNodes(libs)
+		root = xml_parser.fromXml(xml, additional_nodes=nodes)
+
+		layout = Layout(root)
+		render(layout, libs)
 
 	def getDataDirectory(self):
 		return config.get("data_directory", "%s/data" % config["root_directory"])
