@@ -207,7 +207,11 @@ class ZeroHello(Callable.WithHelp):
 			interactive                 Display UI
 		"""
 
-		from clirender import easyRender
+		from clirender import easyRender, register
+		from zeronet_lib.zapp import createLib
+
+		address = self.getAddress()
+		register("ZeroFrame", createLib(address, self.connect(address)))
 
 		with open("zerohello.xml") as f:
 			xml = f.read()
