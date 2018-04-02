@@ -207,18 +207,12 @@ class ZeroHello(Callable.WithHelp):
 			interactive                 Display UI
 		"""
 
-		from clirender.layout import xml_parser, Layout
-		from clirender.layout.libs import render, getAdditionalNodes
+		from clirender import easyRender
 
 		with open("zerohello.xml") as f:
 			xml = f.read()
 
-		libs = xml_parser.gatherLibs(xml)
-		nodes = getAdditionalNodes(libs)
-		root = xml_parser.fromXml(xml, additional_nodes=nodes)
-
-		layout = Layout(root)
-		render(layout, libs)
+		easyRender(xml)
 
 	def getDataDirectory(self):
 		return config.get("data_directory", "%s/data" % config["root_directory"])
