@@ -7,8 +7,8 @@ class ZeroFrame(object):
 		self.site = site
 		self.ws = ws
 
-	def cmd(self, cmd):
-		return self.ws.send(cmd)
+	def cmd(self, *args, **kwargs):
+		return self.ws.send(*args, **kwargs)
 
 def createLib(site, ws):
 	cached = {}
