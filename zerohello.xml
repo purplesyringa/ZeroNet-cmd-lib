@@ -1,0 +1,275 @@
+<Container>
+	<Use lib="Loops" />
+	<Use lib="TabSwitch" />
+	<Use lib="Conditional" />
+	<Use lib="Scrollable" />
+	<Use lib="Events" />
+	<Use lib="Query" />
+	<Use lib="ZeroFrame" />
+
+
+	<Global :cachedSites="{}" />
+	<Function name="getAllSiteList"><![CDATA[
+		cached(ZeroFrame.cmd, "siteList")
+	]]></Function>
+	<Function name="getAllSites"><![CDATA[
+		if len(cachedSites) == 0:
+			cachedSites.update(dict([(site["address"], site) for site in getAllSiteList()]))
+
+		cachedSites
+	]]></Function>
+
+	<Function name="getFavoriteList"><![CDATA[
+		ZeroFrame.cmd("userGetSettings").get("favorite_sites", {}).keys()
+	]]></Function>
+	<Function name="getFavorites"><![CDATA[
+		[getAllSites()[address] for address in getFavoriteList()]
+	]]></Function>
+
+	<Function name="getOwnedSites"><![CDATA[
+		[site for site in getAllSiteList() if site["settings"]["own"]]
+	]]></Function>
+
+
+	<Function name="getFeed"><![CDATA[
+		feed = ZeroFrame.cmd("feedQuery", 30, 3)
+
+		if "rows" in feed:
+			rows = feed["rows"]
+		else:
+			rows = feed
+
+		def keySort(row):
+			return -row["date_added"]
+		rows.sort(key=keySort)
+
+		for row in rows:
+			row["site_name"] = getAllSites()[row["site"]]["content"]["title"]
+
+		rows
+	]]></Function>
+
+
+	<Define name="Offset">
+		<Slot define="left" default="0" />
+		<Slot define="right" default="0" />
+		<Slot define="top" default="0" />
+		<Slot define="bottom" default="0" />
+		<Slot define="bg" :default="__unset__" />
+		<Slot define="" container="node" />
+
+		<StackPanel :bg="bg" orientation="vertical">
+			<Rect width="0" :height="top" />
+
+			<StackPanel orientation="horizontal" :inherit-bg="bg">
+				<Rect :width="left" height="0" />
+				<Slot />
+				<Rect :width="right" height="0" />
+			</StackPanel>
+
+			<Rect width="0" :height="bottom" />
+		</StackPanel>
+	</Define>
+
+	<Define name="Site">
+		<Slot define="dot" />
+		<Slot define="" container="text" />
+
+		<Focusable ::onFocus="self.childNodes[0].scrollIntoView()">
+			<If
+				:is="focused"
+
+				with="bg"
+				then="#353946 | blue"
+				else="inherit"
+			>
+				<StackPanel width="100%" :bg="bg" orientation="horizontal">
+					<Rect width="100%" height="1" />
+
+					<Switch />
+
+					<Text :color="dot" bg="inherit">  @ </Text>
+					<Text color="#FFF | white" bg="inherit"><Slot /></Text>
+
+					<Switch />
+
+					<Text width="100%" color="#3D444B | white" bg="inherit" fill="fill">_</Text>
+				</StackPanel>
+			</If>
+		</Focusable>
+	</Define>
+
+	<Define name="SiteGroup">
+		<Slot define="" container="text" />
+
+		<StackPanel width="100%" bg="inherit" orientation="vertical">
+			<Rect width="100%" height="1" />
+			<Text color="#666 | white" bg="inherit">    <Slot />:</Text>
+			<Rect width="100%" height="1" />
+		</StackPanel>
+	</Define>
+
+	<Define name="ColoredValue">
+		<Slot define="color" />
+		<Slot define="name" />
+		<Slot define="value" />
+
+		<Offset left="2" top="1" right="2" bottom="1" bg="#FFF | white">
+			<StackPanel orientation="horizontal" bg="inherit">
+				<Text color="#2d2f3e | black" bg="inherit"><Slot name="name" />: </Text>
+				<Text :color="color" bg="inherit"><Slot name="value" /></Text>
+			</StackPanel>
+		</Offset>
+	</Define>
+
+
+	<Define name="Feed">
+		<Slot define="site" />
+		<Slot define="date" />
+		<Slot define="color" />
+		<Slot define="title" />
+		<Slot define="" container="text" />
+
+		<Focusable disabled="disabled">
+			<If
+				:is="focused"
+
+				with="bg"
+				then="#FFF | white"
+				else="#EEE | white"
+			>
+				<StackPanel width="100%" orientation="vertical" :bg="bg">
+					<Rect width="1" height="1" />
+					<AlignRight width="16" inherit-bg="inherit">
+						<Text color="#555 | black" bright="bright" bg="inherit"><Slot name="site" /></Text>
+					</AlignRight>
+					<AlignRight width="16" inherit-bg="inherit">
+						<Text color="#AAA | black" bg="inherit"><Slot name="date" /></Text>
+					</AlignRight>
+
+					<Switch />
+
+					<Rect width="1" height="stretch" />
+					<Switch />
+
+					<Text color="#EEE | black" bg="inherit">|</Text>
+					<Text :color="color" bg="inherit">O</Text>
+					<Text width="1" height="stretch - 2" fill="fill" color="#EEE | black" bg="inherit">|</Text>
+
+					<Switch />
+					<Rect width="1" height="stretch" />
+
+					<Switch />
+
+					<Rect width="1" height="1" />
+					<Text color="#222 | black" bg="inherit"><Slot name="title" /></Text>
+					<Text color="#8A8A8A | black" bg="inherit" wrap="wrap"><Slot /></Text>
+				</StackPanel>
+			</If>
+		</Focusable>
+	</Define>
+
+	<!-- main -->
+	<StackPanel width="100%" height="100%" orientation="horizontal" optimize="aggressive">
+		<!-- sidebar -->
+		<StackPanel width="30%" height="100%" orientation="vertical">
+			<Method name="onKeyPress"><![CDATA[
+				for tag in layout.byDefineName('Site'):
+					tag['disabled'] = True
+
+				for tag in layout.byDefineName('Feed'):
+					tag['disabled'] = False
+			]]></Method>
+
+			<!-- 0 Hello ZeroNet_ -->
+			<StackPanel width="100%" height="5" bg="#1E2429 | black" orientation="horizontal">
+
+				<Rect width="3" height="100%" />
+
+				<!-- 0 -->
+				<StackPanel width="3" height="5" bg="inherit" orientation="vertical">
+					<Text color="#9764f8 | magenta" bright="bright" bg="inherit"> _ </Text>
+					<Text color="#9764f8 | magenta" bright="bright" bg="inherit">/ \</Text>
+					<Text color="#9764f8 | magenta" bright="bright" bg="inherit">|/|</Text>
+					<Text color="#9764f8 | magenta" bright="bright" bg="inherit">\_/</Text>
+				</StackPanel>
+
+				<Rect width="3" height="100%" />
+
+				<!-- Hello ZeroNet_ -->
+				<StackPanel width="100%" height="5" bg="inherit" orientation="vertical">
+					<Rect width="100%" height="2" />
+					<Text color="#FFF | white" bright="bright" bg="inherit">Hello ZeroNet_</Text>
+				</StackPanel>
+			</StackPanel>
+
+			<Scrolled y="0">
+				<StackPanel width="100%" height="100% - 5" inherit-bg="#232A31 | black" orientation="vertical" optimize="aggressive">
+					<!-- Sites -->
+					<Rect width="100%" height="1" bg="inherit" />
+					<Text width="100%" color="#83EFFF | cyan" bright="bright" bg="inherit">    Sites</Text>
+					<Text width="100%" color="#83EFFF | cyan" bright="bright" bg="inherit">   -------</Text>
+
+					<!-- Filter: Site name -->
+					<Rect width="100%" height="1" bg="inherit" />
+
+					<StackPanel width="100%" height="3" bg="inherit" orientation="horizontal">
+						<Rect width="2" height="100%" />
+
+						<StackPanel width="100% - 4" inherit-color="#6c7884 | white" bg="#1e2429 | black" orientation="horizontal">
+							<Text color="inherit" bg="inherit">+-</Text>
+							<Text width="100% - 4" color="inherit" bg="inherit" fill="fill">-</Text>
+							<Text color="inherit" bg="inherit">-+</Text>
+
+							<Switch />
+
+							<Text color="inherit" bg="inherit">| </Text>
+							<Text width="100% - 4" color="#FFF | white" bg="inherit">Filter: Site name</Text>
+							<Text color="inherit" bg="inherit"> |</Text>
+
+							<Switch />
+
+							<Text color="inherit" bg="inherit">+-</Text>
+							<Text width="100% - 4" color="inherit" bg="inherit" fill="fill">-</Text>
+							<Text color="inherit" bg="inherit">-+</Text>
+						</StackPanel>
+					</StackPanel>
+
+					<Rect width="100%" height="1" bg="inherit" />
+
+
+					<!-- Favorites -->
+					<SiteGroup>FAVORITES</SiteGroup>
+
+					<For slot="site" :in="getFavorites()">
+						<Site :dot="toColor(site['address'], 40, 50)"><Slot name="site['content']['title'].encode('utf-8')" /></Site>
+					</For>
+
+					<!-- Owned sites -->
+					<SiteGroup>OWNED SITES</SiteGroup>
+
+					<For slot="site" :in="getOwnedSites()">
+						<Site :dot="toColor(site['address'], 40, 50)"><Slot name="site['content']['title'].encode('utf-8')" /></Site>
+					</For>
+				</StackPanel>
+			</Scrolled>
+		</StackPanel>
+
+		<StackPanel width="70%" height="100%" orientation="vertical">
+			<AlignRight width="100%" height="5" bg="#EDF2F5 | white">
+				<Offset top="1" bottom="1">
+					<StackPanel orientation="horizontal" wspacing="2">
+						<ColoredValue color="#2ecc71" name="PORT" value="CLOSED" />
+						<ColoredValue color="#E7A43C" name="TOR" value="ERROR" />
+					</StackPanel>
+				</Offset>
+			</AlignRight>
+
+			<StackPanel width="100%" height="100% - 5" orientation="vertical">
+				<For slot="row" :in="getFeed()">
+					<Feed :site="row['site_name']" date="1 hour ago" color="red" :title="row['title']"><Slot name="row['body']" /></Feed>
+				</For>
+			</StackPanel>
+		</StackPanel>
+	</StackPanel>
+</Container>
